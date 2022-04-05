@@ -58,6 +58,7 @@ def shopify_error_handling():
             # indefinitely. At some point we could consider adding a
             # max_retry configuration into this loop. So far that has
             # proven unnecessary
+            attempt = 0
             while True:
                 try:
                     return fnc(*args, **kwargs)
@@ -72,6 +73,9 @@ def shopify_error_handling():
                                          or resp.headers.get('retry-after', 2)
                         LOGGER.info("Received 429 -- sleeping for %s seconds", sleep_time_str)
                         time.sleep(math.floor(float(sleep_time_str)))
+                        continue
+                    elif (resp.code == 500 or 599) and (attempt<MAX_RETRIES):
+                        attempt += 1
                         continue
                     else:
                         LOGGER.error("Received a %s error.", resp.code)
