@@ -59,7 +59,8 @@ def shopify_error_handling():
             # max_retry configuration into this loop. So far that has
             # proven unnecessary
             attempt = 0
-            while True:
+            i = 0
+            while i < 1000: #arbitrary big number
                 try:
                     return fnc(*args, **kwargs)
                 except pyactiveresource.connection.ClientError as client_error:
@@ -73,6 +74,7 @@ def shopify_error_handling():
                                          or resp.headers.get('retry-after', 2)
                         LOGGER.info("Received 429 -- sleeping for %s seconds", sleep_time_str)
                         time.sleep(math.floor(float(sleep_time_str)))
+                        i += 1
                         continue
                     elif (resp.code == 500 or 599) and (attempt<MAX_RETRIES):
                         attempt += 1
